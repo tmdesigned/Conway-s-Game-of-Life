@@ -1,0 +1,32 @@
+$darkColor : #444444;
+$inactiveColor : #777777;
+$highlightColor : #4789e9;
+
+@mixin square{
+
+  border:1px solid #ddd;
+  float:left;
+  line-height: 0;
+}
+
+body{
+  background-color:$darkColor;
+}
+
+.displayText{
+  color:#fff;
+}
+.livingSquare{
+    @include square;
+    background-color:$highlightColor;
+}
+
+.deadSquare{
+  @include square;
+  background-color:$inactiveColor;
+}
+
+.endRow{
+  clear:both;
+
+}
