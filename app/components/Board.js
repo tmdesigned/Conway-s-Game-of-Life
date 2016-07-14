@@ -11,7 +11,9 @@ var Board = React.createClass({
   getInitialState: function(){
     return{
       boardArray: [],
-      lifecycles: 0
+      lifecycles: 0,
+      isPlaying: false,
+    
     }
   },
   getDefaultProps: function(){
@@ -37,6 +39,8 @@ var Board = React.createClass({
       this.state.boardArray.push(tempArray);
     }
   }
+  var myTimeline = setInterval(this.handleAdvance,200)
+  this.setState({timeline:myTimeline,isPlaying:true})
   },
   loadTemplate: function(name){
     var holdArray = [];
@@ -56,11 +60,105 @@ var Board = React.createClass({
     this.handlePause();
     this.loadTemplate("pulsar");
   },
-  dimensions: function(cols,rows){
+  dimensions: function(cols){
     var proposedWidth = Math.floor(this.props.containerWidth/cols);
-
+    console.log("Container width: " + this.props.containerWidth);
+    console.log("Cols: " + cols);
       return proposedWidth;
 
+  },
+  handleAddCol: function(){
+    this.setState(function(oldState,props){
+      return {
+        boardArray: this.addCol(oldState.boardArray)
+      }
+    });
+  },
+  addCol: function(oldBoardArray){
+      //Make a copy of the original array
+      {
+      var newBoardArray = [];
+      for(var i=0;i<oldBoardArray.length;i++){
+        var tempArray = [];
+        for(var j=0;j<oldBoardArray[i].length;j++){
+          tempArray.push(oldBoardArray[i][j]);
+        }
+        tempArray.push(0); //add an extra to the end of each internal array
+      newBoardArray.push(tempArray);
+      }
+
+      return newBoardArray;
+    }
+  },
+  handleAddRow: function(){
+    this.setState(function(oldState,props){
+      return {
+        boardArray: this.addRow(oldState.boardArray)
+      }
+    });
+  },
+  addRow: function(oldBoardArray){
+      //Make a copy of the original array
+      {
+      var newBoardArray = [];
+      for(var i=0;i<oldBoardArray.length;i++){
+        var tempArray = [];
+        for(var j=0;j<oldBoardArray[i].length;j++){
+          tempArray.push(oldBoardArray[i][j]);
+        }
+      newBoardArray.push(tempArray);
+      }
+
+      //Add one extra array of the proper length to the end of the outer array
+      var tempArray = [];
+      for(var k=0;k<oldBoardArray[0].length;k++){
+        tempArray.push(0);
+      }
+      newBoardArray.push(tempArray);
+      return newBoardArray;
+    }
+  },
+  handleRemoveCol: function(){
+    this.setState(function(oldState,props){
+      return {
+        boardArray: this.removeCol(oldState.boardArray)
+      }
+    });
+  },
+  removeCol: function(oldBoardArray){
+      //Make a copy of the original array, but stop one outer row short
+      {
+      var newBoardArray = [];
+      for(var i=0;i<(oldBoardArray.length);i++){
+        var tempArray = [];
+        for(var j=0;j<oldBoardArray[i].length-1;j++){
+          tempArray.push(oldBoardArray[i][j]);
+        }
+      newBoardArray.push(tempArray);
+      }
+      return newBoardArray;
+    }
+  },
+  handleRemoveRow: function(){
+    this.setState(function(oldState,props){
+      return {
+        boardArray: this.removeRow(oldState.boardArray)
+      }
+    });
+  },
+  removeRow: function(oldBoardArray){
+      //Make a copy of the original array, but stop one outer row short
+      {
+      var newBoardArray = [];
+      for(var i=0;i<(oldBoardArray.length - 1);i++){
+        var tempArray = [];
+        for(var j=0;j<oldBoardArray[i].length;j++){
+          tempArray.push(oldBoardArray[i][j]);
+        }
+      newBoardArray.push(tempArray);
+      }
+      return newBoardArray;
+    }
   },
   nextBoardArray: function(oldBoardArray){
     //Creates next generation's board based on current generation
@@ -160,7 +258,7 @@ var Board = React.createClass({
   handlePlay: function(){
     //For now, just keep iterating generations
     var myTimeline = setInterval(this.handleAdvance,200)
-    this.setState({timeline:myTimeline})
+    this.setState({timeline:myTimeline,isPlaying:true})
   },
   handleAdvance: function(){
     //Handle an individual generation, calling for a new board and incrementing the
@@ -174,6 +272,7 @@ var Board = React.createClass({
   },
   handlePause: function(){
     clearInterval(this.state.timeline);
+    this.setState({isPlaying:false})
 
   },
   toggle: function(a,b){
@@ -183,13 +282,12 @@ var Board = React.createClass({
     this.setState({boardArray:newArray});
   },
   render: function(){
-    var sizeOfPlot = this.dimensions(this.state.boardArray.length,this.state.boardArray[0].length);
+    var sizeOfPlot = this.dimensions(this.state.boardArray[0].length);
 
     return(
-      <div>
-      <div className="displayText">Lifecycles: {this.state.lifecycles}
-      </div>
-      <ControlBoard onAdvance={this.handlePlay} onPulsar={this.pulsar} onPause={this.handlePause} onClear={this.clearBoard}/>
+      <div >
+
+      <ControlBoard isPlaying={this.state.isPlaying} onAddRow={this.handleAddRow} lifecycles={this.state.lifecycles} onRemoveRow={this.handleRemoveRow} onAddCol={this.handleAddCol} onRemoveCol={this.handleRemoveCol} onAdvance={this.handlePlay} onPulsar={this.pulsar} onPause={this.handlePause} onClear={this.clearBoard}/>
 
       {this.state.boardArray.map(function(e,indE){
         var arr = e.map(function(q,indQ){

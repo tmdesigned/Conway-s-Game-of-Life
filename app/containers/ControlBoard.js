@@ -4,11 +4,26 @@ var PropTypes = React.PropTypes;
 function ControlBoard (props){
 
     return(
-      <div>
-      <button type="button" onClick={props.onAdvance} className="btn btn-success">Play</button>
-      <button type="button" onClick={props.onPause} className="btn btn-warning">Pause</button>
-      <button type="button" onClick={props.onClear} className="btn btn-danger">Clear</button>
-      <button type="button" onClick={props.onPulsar} className="btn">Pulsar</button>
+
+        <div>
+          <button type="button" onClick={props.isPlaying ? props.onPause : props.onAdvance}
+            className="btn btn-success">{props.isPlaying ? <i className="fa fa-pause"></i> : <i className="fa fa-play"></i>}</button>
+
+        <button type="button" onClick={props.onClear} className="btn btn-danger marginLeft">Clear</button>
+        <div className="btn-group paddingLeft">
+          <button type="button" onClick={props.onRemoveRow} className="btn">-</button>
+          <button type="button" className="btn disabled">Row</button>
+          <button type="button" onClick={props.onAddRow} className="btn">+</button>
+        </div>
+        <div className="btn-group paddingLeft">
+          <button type="button" onClick={props.onRemoveCol} className="btn">-</button>
+          <button type="button" className="btn disabled">Col</button>
+          <button type="button" onClick={props.onAddCol} className="btn">+</button>
+        </div>
+        <button type="button" onClick={props.onPulsar} className="btn marginLeft">Pulsar</button>
+
+        <div className="displayText">Lifecycles: {props.lifecycles}
+        </div>
 
       </div>
     )

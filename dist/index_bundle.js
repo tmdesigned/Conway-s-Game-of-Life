@@ -13972,7 +13972,9 @@
 	  getInitialState: function () {
 	    return {
 	      boardArray: [],
-	      lifecycles: 0
+	      lifecycles: 0,
+	      isPlaying: false
+	
 	    };
 	  },
 	  getDefaultProps: function () {
@@ -13998,6 +14000,8 @@
 	        this.state.boardArray.push(tempArray);
 	      }
 	    }
+	    var myTimeline = setInterval(this.handleAdvance, 200);
+	    this.setState({ timeline: myTimeline, isPlaying: true });
 	  },
 	  loadTemplate: function (name) {
 	    var holdArray = [];
@@ -14016,10 +14020,104 @@
 	    this.handlePause();
 	    this.loadTemplate("pulsar");
 	  },
-	  dimensions: function (cols, rows) {
+	  dimensions: function (cols) {
 	    var proposedWidth = Math.floor(this.props.containerWidth / cols);
-	
+	    console.log("Container width: " + this.props.containerWidth);
+	    console.log("Cols: " + cols);
 	    return proposedWidth;
+	  },
+	  handleAddCol: function () {
+	    this.setState(function (oldState, props) {
+	      return {
+	        boardArray: this.addCol(oldState.boardArray)
+	      };
+	    });
+	  },
+	  addCol: function (oldBoardArray) {
+	    //Make a copy of the original array
+	    {
+	      var newBoardArray = [];
+	      for (var i = 0; i < oldBoardArray.length; i++) {
+	        var tempArray = [];
+	        for (var j = 0; j < oldBoardArray[i].length; j++) {
+	          tempArray.push(oldBoardArray[i][j]);
+	        }
+	        tempArray.push(0); //add an extra to the end of each internal array
+	        newBoardArray.push(tempArray);
+	      }
+	
+	      return newBoardArray;
+	    }
+	  },
+	  handleAddRow: function () {
+	    this.setState(function (oldState, props) {
+	      return {
+	        boardArray: this.addRow(oldState.boardArray)
+	      };
+	    });
+	  },
+	  addRow: function (oldBoardArray) {
+	    //Make a copy of the original array
+	    {
+	      var newBoardArray = [];
+	      for (var i = 0; i < oldBoardArray.length; i++) {
+	        var tempArray = [];
+	        for (var j = 0; j < oldBoardArray[i].length; j++) {
+	          tempArray.push(oldBoardArray[i][j]);
+	        }
+	        newBoardArray.push(tempArray);
+	      }
+	
+	      //Add one extra array of the proper length to the end of the outer array
+	      var tempArray = [];
+	      for (var k = 0; k < oldBoardArray[0].length; k++) {
+	        tempArray.push(0);
+	      }
+	      newBoardArray.push(tempArray);
+	      return newBoardArray;
+	    }
+	  },
+	  handleRemoveCol: function () {
+	    this.setState(function (oldState, props) {
+	      return {
+	        boardArray: this.removeCol(oldState.boardArray)
+	      };
+	    });
+	  },
+	  removeCol: function (oldBoardArray) {
+	    //Make a copy of the original array, but stop one outer row short
+	    {
+	      var newBoardArray = [];
+	      for (var i = 0; i < oldBoardArray.length; i++) {
+	        var tempArray = [];
+	        for (var j = 0; j < oldBoardArray[i].length - 1; j++) {
+	          tempArray.push(oldBoardArray[i][j]);
+	        }
+	        newBoardArray.push(tempArray);
+	      }
+	      return newBoardArray;
+	    }
+	  },
+	  handleRemoveRow: function () {
+	    this.setState(function (oldState, props) {
+	      return {
+	        boardArray: this.removeRow(oldState.boardArray)
+	      };
+	    });
+	  },
+	  removeRow: function (oldBoardArray) {
+	    //Make a copy of the original array, but stop one outer row short
+	    {
+	      var newBoardArray = [];
+	      for (var i = 0; i < oldBoardArray.length - 1; i++) {
+	        var tempArray = [];
+	        for (var j = 0; j < oldBoardArray[i].length; j++) {
+	          tempArray.push(oldBoardArray[i][j]);
+	        }
+	        newBoardArray.push(tempArray);
+	      }
+	      return newBoardArray;
+	    }
 	  },
 	  nextBoardArray: function (oldBoardArray) {
 	    //Creates next generation's board based on current generation
@@ -14119,7 +14217,7 @@
 	  handlePlay: function () {
 	    //For now, just keep iterating generations
 	    var myTimeline = setInterval(this.handleAdvance, 200);
-	    this.setState({ timeline: myTimeline });
+	    this.setState({ timeline: myTimeline, isPlaying: true });
 	  },
 	  handleAdvance: function () {
 	    //Handle an individual generation, calling for a new board and incrementing the
@@ -14133,6 +14231,7 @@
 	  },
 	  handlePause: function () {
 	    clearInterval(this.state.timeline);
+	    this.setState({ isPlaying: false });
 	  },
 	  toggle: function (a, b) {
 	    //Use React's immutability helper to alter the state of a single Plot (square)
@@ -14145,18 +14244,12 @@
 	    this.setState({ boardArray: newArray });
 	  },
 	  render: function () {
-	    var sizeOfPlot = this.dimensions(this.state.boardArray.length, this.state.boardArray[0].length);
+	    var sizeOfPlot = this.dimensions(this.state.boardArray[0].length);
 	
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(
-	        'div',
-	        { className: 'displayText' },
-	        'Lifecycles: ',
-	        this.state.lifecycles
-	      ),
-	      React.createElement(ControlBoard, { onAdvance: this.handlePlay, onPulsar: this.pulsar, onPause: this.handlePause, onClear: this.clearBoard }),
+	      React.createElement(ControlBoard, { isPlaying: this.state.isPlaying, onAddRow: this.handleAddRow, lifecycles: this.state.lifecycles, onRemoveRow: this.handleRemoveRow, onAddCol: this.handleAddCol, onRemoveCol: this.handleRemoveCol, onAdvance: this.handlePlay, onPulsar: this.pulsar, onPause: this.handlePause, onClear: this.clearBoard }),
 	      this.state.boardArray.map(function (e, indE) {
 	        var arr = e.map(function (q, indQ) {
 	          return React.createElement(Plot, { toggleFunc: this.toggle.bind(this, indE, indQ), dim: sizeOfPlot, coordX: indE, coordY: indQ, status: q });
@@ -14188,8 +14281,39 @@
 	      { className: 'container' },
 	      React.createElement(
 	        'div',
-	        { className: 'col-md-10 col-md-offset-1 col-xs-12 col-sm-12' },
-	        React.createElement(Board, { width: 50, height: 50 })
+	        { className: 'row' },
+	        React.createElement(
+	          'div',
+	          { className: 'col-md-10 col-md-offset-1 col-xs-12 col-sm-12', id: 'headerDiv' },
+	          React.createElement(
+	            'span',
+	            { className: 'lead' },
+	            'Conway\'s Game of Life'
+	          ),
+	          React.createElement(
+	            'p',
+	            { className: 'text-info' },
+	            'A project demonstrating React by Taylor Morgan | ',
+	            React.createElement(
+	              'a',
+	              { target: '_blank', href: 'https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life' },
+	              React.createElement(
+	                'small',
+	                null,
+	                'What is this game?'
+	              )
+	            )
+	          )
+	        )
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'row' },
+	        React.createElement(
+	          'div',
+	          { className: 'col-md-10 col-md-offset-1 col-xs-12 col-sm-12' },
+	          React.createElement(Board, { width: 40, height: 20 })
+	        )
 	      )
 	    );
 	  }
@@ -14268,8 +14392,8 @@
 	
 	var Templates = {
 	
-	          'blank': [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-	          'pulsar': [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0], [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0], [0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+	          'blank': [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+	          'pulsar': [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 	};
 	
 	module.exports = Templates;
@@ -14313,23 +14437,63 @@
 	    null,
 	    React.createElement(
 	      "button",
-	      { type: "button", onClick: props.onAdvance, className: "btn btn-success" },
-	      "Play"
+	      { type: "button", onClick: props.isPlaying ? props.onPause : props.onAdvance,
+	        className: "btn btn-success" },
+	      props.isPlaying ? React.createElement("i", { className: "fa fa-pause" }) : React.createElement("i", { className: "fa fa-play" })
 	    ),
 	    React.createElement(
 	      "button",
-	      { type: "button", onClick: props.onPause, className: "btn btn-warning" },
-	      "Pause"
-	    ),
-	    React.createElement(
-	      "button",
-	      { type: "button", onClick: props.onClear, className: "btn btn-danger" },
+	      { type: "button", onClick: props.onClear, className: "btn btn-danger marginLeft" },
 	      "Clear"
 	    ),
 	    React.createElement(
+	      "div",
+	      { className: "btn-group paddingLeft" },
+	      React.createElement(
+	        "button",
+	        { type: "button", onClick: props.onRemoveRow, className: "btn" },
+	        "-"
+	      ),
+	      React.createElement(
+	        "button",
+	        { type: "button", className: "btn disabled" },
+	        "Row"
+	      ),
+	      React.createElement(
+	        "button",
+	        { type: "button", onClick: props.onAddRow, className: "btn" },
+	        "+"
+	      )
+	    ),
+	    React.createElement(
+	      "div",
+	      { className: "btn-group paddingLeft" },
+	      React.createElement(
+	        "button",
+	        { type: "button", onClick: props.onRemoveCol, className: "btn" },
+	        "-"
+	      ),
+	      React.createElement(
+	        "button",
+	        { type: "button", className: "btn disabled" },
+	        "Col"
+	      ),
+	      React.createElement(
+	        "button",
+	        { type: "button", onClick: props.onAddCol, className: "btn" },
+	        "+"
+	      )
+	    ),
+	    React.createElement(
 	      "button",
-	      { type: "button", onClick: props.onPulsar, className: "btn" },
+	      { type: "button", onClick: props.onPulsar, className: "btn marginLeft" },
 	      "Pulsar"
+	    ),
+	    React.createElement(
+	      "div",
+	      { className: "displayText" },
+	      "Lifecycles: ",
+	      props.lifecycles
 	    )
 	  );
 	}

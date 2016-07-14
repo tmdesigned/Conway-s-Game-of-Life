@@ -13,9 +13,33 @@ body{
   background-color:$darkColor;
 }
 
-.displayText{
+#headerDiv{
+  margin-top:15px;
   color:#fff;
 }
+
+.paddingLeft{
+  padding-left:20px;
+}
+
+.marginLeft{
+  margin-left:20px;
+}
+.displayText{
+  color:#fff;
+  margin-bottom:10px;
+  margin-top:10px;
+  font-size:14pt;
+  font-weight:bold;
+}
+
+.text-info, .text-info a{
+  color:#fff;
+  margin-bottom:10px;
+}
+
+
+
 .livingSquare{
     @include square;
     background-color:$highlightColor;
@@ -29,4 +53,9 @@ body{
 .endRow{
   clear:both;
 
+}
+
+.contWidth{
+  width:500px;
+  height:500px;
 }
