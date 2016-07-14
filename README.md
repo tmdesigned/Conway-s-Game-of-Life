@@ -19,3 +19,7 @@ Dead Square:
 Users can add or remove rows and columns, click each square individually to set up their own pattern, or watch a predefined repeating pattern (i.e. "pulsar").
 
 Webpack is used to automatically bundle both the .js and .scss files.
+
+Demo
+---
+http://www.tmdesigned.com/examples/game_of_life/
