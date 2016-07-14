@@ -1,4 +1,3 @@
-# Conway-s-Game-of-Life
 Conway's Game of Life simulator using React and SASS
 ===
 by Taylor Morgan
