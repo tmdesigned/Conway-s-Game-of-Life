@@ -13,7 +13,7 @@ var Board = React.createClass({
       boardArray: [],
       lifecycles: 0,
       isPlaying: false,
-    
+
     }
   },
   getDefaultProps: function(){
@@ -48,6 +48,10 @@ var Board = React.createClass({
       holdArray = Templates.blank;
     }else if(name==="pulsar"){
       holdArray = Templates.pulsar;
+    }else if(name==="gun"){
+      holdArray = Templates.gun;
+    }else if(name==="gliders"){
+      holdArray = Templates.gliders;
     }
     this.setState({boardArray:holdArray,lifecycles:0});
   },
@@ -59,6 +63,14 @@ var Board = React.createClass({
   pulsar: function(){
     this.handlePause();
     this.loadTemplate("pulsar");
+  },
+  gliderGun: function(){
+    this.handlePause();
+    this.loadTemplate("gun");
+  },
+  gliders: function(){
+    this.handlePause();
+    this.loadTemplate("gliders");
   },
   dimensions: function(cols){
     var proposedWidth = Math.floor(this.props.containerWidth/cols);
@@ -287,7 +299,7 @@ var Board = React.createClass({
     return(
       <div >
 
-      <ControlBoard isPlaying={this.state.isPlaying} onAddRow={this.handleAddRow} lifecycles={this.state.lifecycles} onRemoveRow={this.handleRemoveRow} onAddCol={this.handleAddCol} onRemoveCol={this.handleRemoveCol} onAdvance={this.handlePlay} onPulsar={this.pulsar} onPause={this.handlePause} onClear={this.clearBoard}/>
+      <ControlBoard isPlaying={this.state.isPlaying} onAddRow={this.handleAddRow} lifecycles={this.state.lifecycles} onRemoveRow={this.handleRemoveRow} onAddCol={this.handleAddCol} onRemoveCol={this.handleRemoveCol} onAdvance={this.handlePlay} onPulsar={this.pulsar} onGliderGun={this.gliderGun} onGliders={this.gliders} onPause={this.handlePause} onClear={this.clearBoard}/>
 
       {this.state.boardArray.map(function(e,indE){
         var arr = e.map(function(q,indQ){

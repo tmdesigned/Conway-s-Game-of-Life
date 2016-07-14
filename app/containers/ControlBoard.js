@@ -20,8 +20,13 @@ function ControlBoard (props){
           <button type="button" className="btn disabled">Col</button>
           <button type="button" onClick={props.onAddCol} className="btn">+</button>
         </div>
-        <button type="button" onClick={props.onPulsar} className="btn marginLeft">Pulsar</button>
+        <div className="btn-group paddingLeft">
+          <button type="button" className="btn disabled">Examples</button>
+          <button type="button" onClick={props.onGliders} className="btn marginLeft">1</button>
+          <button type="button" onClick={props.onPulsar} className="btn marginLeft">2</button>
+          <button type="button" onClick={props.onGliderGun} className="btn marginLeft">3</button>
 
+        </div>
         <div className="displayText">Lifecycles: {props.lifecycles}
         </div>
 
